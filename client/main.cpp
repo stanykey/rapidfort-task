@@ -23,7 +23,7 @@ int main(int argc, const char* argv[])
     {
         if (argc != 3)
         {
-            std::cerr << "Usage: blocking_tcp_echo_client <host> <port>\n";
+            std::cerr << "Usage: client <host> <port>\n";
             return 1;
         }
 

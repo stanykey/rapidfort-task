@@ -12,7 +12,7 @@ int main(int argc, const char* argv[])
     {
         if (argc != 2)
         {
-            std::cerr << "Usage: async_tcp_echo_server <port>\n";
+            std::cerr << "Usage: server <port>\n";
             return 1;
         }
 
@@ -20,9 +20,9 @@ int main(int argc, const char* argv[])
         primes::server server(io_context, std::atoi(argv[1]));
         io_context.run();
     }
-    catch (std::exception& e)
+    catch (const std::exception& ex)
     {
-        std::cerr << "Exception: " << e.what() << "\n";
+        std::cerr << "Exception: " << ex.what() << "\n";
     }
 
     return 0;

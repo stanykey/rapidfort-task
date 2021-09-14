@@ -4,6 +4,8 @@
 #include <memory>
 #include <string>
 #include <sstream>
+#include <chrono>
+#include <thread>
 
 #include <boost/asio.hpp>
 
@@ -19,6 +21,7 @@ namespace primes
         explicit session(boost::asio::ip::tcp::socket socket)
             : _socket(std::move(socket))
             , _requested(0)
+            , _outgoing(0)
         {
         }
 
@@ -32,7 +35,7 @@ namespace primes
         {
             auto self(shared_from_this());
             _socket.async_read_some(boost::asio::buffer(_requested.data(), _requested.size()),
-                [this, self](boost::system::error_code error, std::size_t length)
+                [this, self](boost::system::error_code error, std::size_t /*length*/)
                 {
                     if (!error)
                     {
@@ -44,23 +47,35 @@ namespace primes
 
         void process_request()
         {
-            auto self(shared_from_this());
-            auto primes = prime_generator::get_primes(_requested.value());
-            while (!primes.empty())
+            _primes = prime_generator::get_primes(_requested.value());
+            send_next_prime();
+        }
+
+        void send_next_prime()
+        {
+            if (!_primes.empty())
             {
-                auto prime = new utils::packed<std::size_t>(primes.front());
-                boost::asio::async_write(_socket, boost::asio::buffer(prime->data(), prime->size()),
-                    [self, prime](boost::system::error_code error, std::size_t /*length*/)
+                _outgoing = utils::make_packed(_primes.front());
+                _primes.pop_front();
+                std::this_thread::sleep_for(std::chrono::microseconds(1000));
+
+                boost::asio::async_write(_socket, boost::asio::buffer(_outgoing.data(), _outgoing.size()),
+                    [this, self = shared_from_this()](boost::system::error_code error, std::size_t /*length*/)
                     {
-                        delete prime;
+                        if (!error)
+                        {
+                            send_next_prime();
+                        }
                     }
                 );
-                primes.pop_front();
             }
         }
 
+    private:
         boost::asio::ip::tcp::socket _socket;
         utils::packed<std::uint64_t> _requested;
+        std::list<std::uint64_t>     _primes;
+        utils::packed<std::uint64_t> _outgoing;
     };
 }
 
