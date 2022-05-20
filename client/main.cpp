@@ -7,7 +7,6 @@
 
 #include <boost/asio.hpp>
 
-#include <fmt/ranges.h>
 #include <spdlog/spdlog.h>
 
 #include <utils/io.hpp>
@@ -23,7 +22,7 @@ int main(int argc, const char* argv[])
     {
         if (argc != 3)
         {
-            std::cerr << "Usage: client <host> <port>\n";
+            spdlog::error("Usage: client <host> <port>");
             return 1;
         }
 
@@ -34,7 +33,10 @@ int main(int argc, const char* argv[])
         boost::asio::connect(server, resolver.resolve(argv[1], argv[2]));
 
         std::cout << "How many primes do you want?: ";
-        const auto request = utils::make_packed(utils::read<std::uint64_t>(std::cin));
+        auto const primes_count = utils::read<std::uint64_t>(std::cin);
+        spdlog::info("Client will request {} prime numbers", primes_count);
+
+        const auto request = utils::make_packed(primes_count);
         boost::asio::write(server, boost::asio::buffer(request.data(), request.size()));
 
         std::deque<std::string> primes;

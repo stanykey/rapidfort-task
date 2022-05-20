@@ -1,6 +1,6 @@
-#include <iostream>
-
 #include "server.hpp"
+
+#include <spdlog/spdlog.h>
 
 
 //
@@ -12,7 +12,7 @@ int main(int argc, const char* argv[])
     {
         if (argc != 2)
         {
-            std::cerr << "Usage: server <port>\n";
+            spdlog::error("Usage: server <port>");
             return 1;
         }
 
@@ -22,7 +22,7 @@ int main(int argc, const char* argv[])
     }
     catch (const std::exception& ex)
     {
-        std::cerr << "Exception: " << ex.what() << "\n";
+        spdlog::error("Exception: {}", ex.what());
     }
 
     return 0;

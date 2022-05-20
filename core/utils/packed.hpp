@@ -1,7 +1,3 @@
-//
-// Created by Admin on 9/14/2021.
-//
-
 #ifndef PRIMES_PACKED_HPP
 #define PRIMES_PACKED_HPP
 
